@@ -28,6 +28,7 @@ export default function SignUp() {
         username,
         password,
         email,
+        details:{},
       });
 
       //  Assume success if no error thrown
