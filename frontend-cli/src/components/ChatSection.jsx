@@ -13,7 +13,7 @@ export default function ChatSection({ user, goBack, setProfileUser }) {
   // Auto-focus input whenever a new user chat opens
   useEffect(() => {
     inputRef.current?.focus();
-  },[user]);
+  }, [user]);
 
   //listen for incoming messages
   useEffect(() => {
@@ -24,19 +24,19 @@ export default function ChatSection({ user, goBack, setProfileUser }) {
         [message.sender]: [
           //access to the previous messages of the sender is allowed in here
           ...(prev[message.sender] || []),
-          //we are setting a deafault format
+          //we are setting a default format
           { sender: message.sender, text: message.text },
         ],
       }));
     };
-  //links to the event chat message and calls handle message
+
+    //links to the event chat message and calls handleMessage
     socket.on("chat message", handleMessage);
-    
-    //cleans the listner when the function re-renders
+
+    //cleans the listener when the function re-renders
     return () => socket.off("chat message", handleMessage);
   }, []);
-  
-  
+
   useEffect(() => {
     //allows the autoscroll to the last message
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -48,8 +48,8 @@ export default function ChatSection({ user, goBack, setProfileUser }) {
   };
 
   const handleSend = () => {
-    if (!input.trim()) return;// prevent sending the empty lines
-  
+    if (!input.trim()) return; // prevent sending the empty lines
+
     // update your message locally
     setAllMessages((prev) => ({
       ...prev,
@@ -58,27 +58,15 @@ export default function ChatSection({ user, goBack, setProfileUser }) {
         { sender: "You", text: input },
       ],
     }));
-  
+
     // Send to backend
     socket.emit("chat message", {
-      to: user.username,
+      sender: user.username, //  use actual username, not "You"
+      to: user.username,     // you might later replace this with the selected recipient
       text: input,
     });
-  
-    setInput("");//clear input field
-  };
-  
 
-    // Optional simulated reply
-    setTimeout(() => {
-      setAllMessages((prev) => ({
-        ...prev,
-        [user.username]: [
-          ...(prev[user.username] || []),
-          { sender: user.username, text: `Reply: ${input}` },
-        ],
-      }));
-    }, 800);
+    setInput(""); //clear input field
   };
 
   const handleKeyPress = (e) => {
@@ -94,7 +82,7 @@ export default function ChatSection({ user, goBack, setProfileUser }) {
           <span
             className="clickable-username"
             onClick={handleUsernameClick}
-            style={{ cursor: 'pointer', textDecoration: 'underline' }}
+            style={{ cursor: "pointer", textDecoration: "underline" }}
           >
             {user.username}
           </span>
@@ -104,7 +92,9 @@ export default function ChatSection({ user, goBack, setProfileUser }) {
         {currentMessages.map((msg, idx) => (
           <div
             key={idx}
-            className={`chat-message ${msg.sender === "You" ? "sent" : "received"}`}
+            className={`chat-message ${
+              msg.sender === "You" ? "sent" : "received"
+            }`}
           >
             <strong>{msg.sender}: </strong>
             {msg.text}
