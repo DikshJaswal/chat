@@ -45,11 +45,19 @@ const io = new Server(server,{
 // we are setting up a listner to the event where client connects to socket.io server and if 
 //this is passed successfully then we get access to the socket.io objects & methods
 io.on('connect', (socket) => {
-    console.log('user connected');
+    console.log('user connected',socket.user.email);
     // here we print the message from the client
     socket.on('chat message', (msg) => {
+        const messageData={
+            sender: socket.user.username, // from JWT payload
+            text: msg.text,
+            to: msg.to, // if doing private chats
+        }
         //send msg to everyone accept the sender
-        socket.broadcast.emit('chat message',msg);
+        socket.broadcast.emit('chat message',messageData);
+    });
+    socket.on('disconnect',()=>{
+        console.log('User disconnected',socket.user.email);
     });
 });
 
