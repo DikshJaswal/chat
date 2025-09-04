@@ -3,7 +3,9 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 //allows to create http server manually 
-const { createServer, Server } = require('node:http');
+const { createServer } = require("node:http");
+const { Server } = require("socket.io"); // this is socket.io's Server
+
 //allows to join several paths in a single segment
 const { join } = require('node:path');
 
