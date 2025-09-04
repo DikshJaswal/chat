@@ -7,7 +7,12 @@ export default function TerminalBox({
   setChatUser,    // NEW
   users,
   onFollowToggle,
+<<<<<<< HEAD
   dmUsers
+=======
+  dmUsers,
+  onLogout
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
 }) {
   const [lines, setLines] = useState([
     "Welcome to ChatCLI!",
@@ -34,9 +39,17 @@ export default function TerminalBox({
       "  follow <user>     Follow a user",
       "  unfollow <user>   Unfollow a user",
       "  dm                Show DM list (right)",
+<<<<<<< HEAD
       "  chat <user>       Open chat with a user in DM list (right)"
     ],
 
+=======
+      "  chat <user>       Open chat with a user in DM list (right)",
+      "  logout            Log out and return to login page"
+    ],
+
+    
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
     clear: () => [],
 
     whoami: () => [
@@ -103,6 +116,18 @@ export default function TerminalBox({
       setRightView("dm");
       setProfileUser(user); 
       return [`Opening chat with ${username}... (input is focused)`];
+<<<<<<< HEAD
+=======
+    },
+
+    logout: () => {
+      if (onLogout) {
+        onLogout();
+        return ["Logging out..."];
+      } else {
+        return ["Logout functionality not available"];
+      }
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
     }
   };
 

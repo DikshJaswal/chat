@@ -8,7 +8,12 @@ export default function ProfileBox({
   gender = "Male",
   bio = "Hacking the matrix one line at a time",
   joinDate = "15/08/2025",
+<<<<<<< HEAD
   isOnline = true
+=======
+  isOnline = true,
+  onLogout
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
 }) {
   const navigate = useNavigate();
 
@@ -42,7 +47,11 @@ export default function ProfileBox({
           {isOnline ? 'ACTIVE' : 'INACTIVE'}
         </span>
         <button 
+<<<<<<< HEAD
           onClick={handleLogout}
+=======
+          onClick={onLogout}
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
           className="logout-btn"
           style={{
             background: 'red',

@@ -24,7 +24,11 @@ import "./components/UsersListBox.css";
 import "./components/DMList.css";
 
 //  Chat UI component (separated from main App router)
+<<<<<<< HEAD
 function ChatUI() {
+=======
+function ChatUI({ onLogout }) {
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
   const [rightView, setRightView] = useState("chat");
   const [currentUser, setCurrentUser] = useState("");
   const [profileUser, setProfileUser] = useState(null);
@@ -163,6 +167,10 @@ function ChatUI() {
             bio={currentUser?.details?.bio || "No bio set"}
             joinDate={new Date().toLocaleDateString()}
             isOnline={true}
+<<<<<<< HEAD
+=======
+            onLogout={onLogout}
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
           />
         )}
 
@@ -173,6 +181,10 @@ function ChatUI() {
           users={users}
           onFollowToggle={handleFollowToggle}
           dmUsers={dmUsers}
+<<<<<<< HEAD
+=======
+          onLogout={onLogout} 
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
         />
       </div>
 
@@ -206,19 +218,112 @@ function ChatUI() {
 
 //  Main App with Routing
 function App() {
+<<<<<<< HEAD
+=======
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check authentication status on app load
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const user = localStorage.getItem('user');
+      setIsAuthenticated(!!user);
+      setIsCheckingAuth(false);
+    };
+
+    checkAuthStatus();
+  }, []);
+
+  const handleLogout = () => {
+    // Clear authentication data
+    localStorage.removeItem('user');
+    // Clear any auth token from cookies if needed
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
+    // Update authentication state
+    setIsAuthenticated(false);
+  };
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  // Show loading while checking authentication status
+  if (isCheckingAuth) {
+    return <div className="h-screen w-screen bg-stone-500 flex items-center justify-center">Loading...</div>;
+  }
+
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
   return (
     <BrowserRouter>
       <div className="h-screen w-screen bg-stone-500">
         <Routes>
+<<<<<<< HEAD
           <Route path="/" element={<Navigate to="/register" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<SignUp />} />
           <Route path="/userprofile" element={<UserProfile />} />
           <Route path="/chat" element={<ChatUI />} />
+=======
+          <Route 
+            path="/" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/chat" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } 
+          />
+          <Route 
+            path="/login" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/chat" replace />
+              ) : (
+                <Login onLogin={handleLogin} />
+              )
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/chat" replace />
+              ) : (
+                <SignUp onLogin={handleLogin} />
+              )
+            } 
+          />
+          <Route 
+            path="/userprofile" 
+            element={
+              isAuthenticated ? (
+                <UserProfile />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } 
+          />
+          <Route 
+            path="/chat" 
+            element={
+              isAuthenticated ? (
+                <ChatUI onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } 
+          />
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
         </Routes>
       </div>
     </BrowserRouter>
   );
 }
 
+<<<<<<< HEAD
 export default App;
+=======
+export default App;
+>>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
