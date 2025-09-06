@@ -30,11 +30,7 @@ export default function Login() {
 
 
       // Call onLogin to update authentication state
-      if (onLogin) {
-        onLogin();
-      }
-
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
+      
       alert("Login successful!");
       setShowMat(true); // trigger Matrix screen
 
