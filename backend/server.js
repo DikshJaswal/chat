@@ -1,7 +1,7 @@
 const express = require('express');
 //this is the cross origin resource sharing for smooth data transfer
 const cors = require('cors');
-require('dotenv').config();
+require('dotenv').config({debug:true});
 //allows to create http server manually 
 const { createServer } = require("node:http");
 const { Server } = require("socket.io"); // this is socket.io's Server
@@ -41,12 +41,18 @@ app.get('/', (req, res) => {
 const io = new Server(server,{
     //it enables restoration of rooms and any missed events when the connection is disrupted
     //its a temporary act
+    cors: {
+        //enable cors operation in socket io
+        origin: process.env.CLIENT_URL || "http://localhost:3000",
+        methods: ["GET", "POST","PUT","DELETE"],
+        credentials: true,
+      },
     connectionStateRecovery: {}
   });
 
 // we are setting up a listner to the event where client connects to socket.io server and if 
 //this is passed successfully then we get access to the socket.io objects & methods
-io.on('connect', (socket) => {
+io.on('connection', (socket) => {
     console.log('user connected',socket.user.email);
     // here we print the message from the client
     socket.on('chat message', (msg) => {
