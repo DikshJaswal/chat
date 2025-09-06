@@ -2,11 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from '../services/api';
 
-<<<<<<< HEAD
 export default function SignUp() {
-=======
-export default function SignUp({ onLogin }) { // Added onLogin prop
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -19,11 +15,7 @@ export default function SignUp({ onLogin }) { // Added onLogin prop
     e.preventDefault();
     setLoading(true);
 
-<<<<<<< HEAD
     //  Validate password match
-=======
-    // Validate password match
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
     if (password !== confPass) {
       alert('Passwords do not match!');
       setLoading(false);
@@ -36,7 +28,6 @@ export default function SignUp({ onLogin }) { // Added onLogin prop
         username,
         password,
         email,
-<<<<<<< HEAD
         details:{},
       });
 
@@ -45,40 +36,6 @@ export default function SignUp({ onLogin }) { // Added onLogin prop
       navigate('/login'); 
     } catch (err) {
       //  Handle server errors
-=======
-        details: {},
-      });
-
-      // Assume success if no error thrown
-      alert('Registration successful!');
-      
-      // NEW: Automatically log in the user after successful registration
-      try {
-        const loginRes = await API.post("/api/login", {
-          username,
-          password,
-        });
-
-        console.log("Auto-login response", loginRes.data);
-        
-        // Store user info in localStorage
-        localStorage.setItem('user', JSON.stringify(loginRes.data.user));
-        
-        // Call onLogin to update authentication state in parent component
-        if (onLogin) {
-          onLogin();
-        }
-        
-        // Navigate to user profile instead of login
-        navigate("/userprofile");
-      } catch (loginErr) {
-        console.error("Auto-login failed:", loginErr);
-        // If auto-login fails, still navigate to login page
-        navigate('/login');
-      }
-    } catch (err) {
-      // Handle server errors
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
       if (err.response) {
         alert(err.response.data.message || 'Registration failed');
       } else {
@@ -106,10 +63,6 @@ export default function SignUp({ onLogin }) { // Added onLogin prop
           onChange={(e) => setUsername(e.target.value)}
           className="w-full bg-slate-800 px-4 py-2 border border-gray-300 rounded 
                      focus:outline-none focus:ring-2 focus:ring-blue-500"
-<<<<<<< HEAD
-=======
-          required
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
         />
 
         <input
@@ -119,10 +72,6 @@ export default function SignUp({ onLogin }) { // Added onLogin prop
           onChange={(e) => setEmail(e.target.value)}
           className="w-full bg-slate-800 px-4 py-2 border border-gray-300 rounded 
                      focus:outline-none focus:ring-2 focus:ring-blue-500"
-<<<<<<< HEAD
-=======
-          required
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
         />
 
         <input
@@ -132,10 +81,6 @@ export default function SignUp({ onLogin }) { // Added onLogin prop
           onChange={(e) => setPassword(e.target.value)}
           className="w-full bg-slate-800 px-4 py-2 border border-gray-300 rounded 
                      focus:outline-none focus:ring-2 focus:ring-blue-500"
-<<<<<<< HEAD
-=======
-          required
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
         />
 
         <input
@@ -145,10 +90,6 @@ export default function SignUp({ onLogin }) { // Added onLogin prop
           onChange={(e) => setConfPass(e.target.value)}
           className="w-full bg-slate-800 px-4 py-2 border border-gray-300 rounded 
                      focus:outline-none focus:ring-2 focus:ring-blue-500"
-<<<<<<< HEAD
-=======
-          required
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
         />
 
         <button
@@ -156,9 +97,6 @@ export default function SignUp({ onLogin }) { // Added onLogin prop
           disabled={loading}
 <<<<<<< HEAD
           className="w-full bg-black  text-white 
-=======
-          className="w-full bg-black text-white 
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
                      font-medium py-2 px-4 rounded transition duration-200
                      disabled:opacity-70 disabled:cursor-not-allowed"
         >
@@ -166,14 +104,6 @@ export default function SignUp({ onLogin }) { // Added onLogin prop
         </button>
 <<<<<<< HEAD
         <p>Already got an account? <Link to='/login'>Login</Link></p>
-=======
-        <p className="text-center text-sm text-gray-300">
-          Already got an account?{" "}
-          <Link to='/login' className="text-green-400 hover:underline">
-            Login
-          </Link>
-        </p>
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
       </form>
     </div>
   );

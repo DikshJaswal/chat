@@ -107,14 +107,7 @@ export default function TerminalBox({
       return [`Opening chat with ${username}... (input is focused)`];
     },
 
-    logout: () => {
-      if (onLogout) {
-        onLogout();
-        return ["Logging out..."];
-      } else {
-        return ["Logout functionality not available"];
-      }
-    }
+   
   };
 
   // --- Command runner ---
