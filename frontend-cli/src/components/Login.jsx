@@ -3,11 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import MatrixBackground from "./loadscreen";
 import API from "../services/api";
 
-<<<<<<< HEAD
+
 export default function Login() {
-=======
-export default function Login({ onLogin }) {
->>>>>>> bf14f87abce5a4f06342526b4138c64abdc917da
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,8 +27,8 @@ export default function Login({ onLogin }) {
       // Store user info in localStorage (token is in cookies automatically)
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
-<<<<<<< HEAD
-=======
+
+
       // Call onLogin to update authentication state
       if (onLogin) {
         onLogin();
