@@ -30,6 +30,7 @@ app.use('/api', require('./routes/loginRoute'));
 app.use('/api', require('./routes/registerRoute'));
 app.use('/api', require('./routes/profileRoute'));
 app.use('/api', require('./routes/logoutRoute'));
+app.use('api',require('./routes/userListRoute'));
 
 app.get('/', (req, res) => {
     res.send('backend is running');
