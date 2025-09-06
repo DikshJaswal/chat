@@ -95,14 +95,12 @@ export default function SignUp() {
         <button
           type="submit"
           disabled={loading}
-<<<<<<< HEAD
           className="w-full bg-black  text-white 
                      font-medium py-2 px-4 rounded transition duration-200
                      disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {loading ? 'Signing Up...' : 'Sign Up'}
         </button>
-<<<<<<< HEAD
         <p>Already got an account? <Link to='/login'>Login</Link></p>
       </form>
     </div>

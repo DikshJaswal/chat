@@ -1,5 +1,19 @@
 //  Chat UI component (separated from main App router)
+import TerminalBox from "../components/TerminalBox";
+import ProfileBox from "../components/ProfileBox";
+import ChatBox from "../components/ChatBox";
+import UsersListBox from "../components/UserListBox";
+import OpenedProfileBox from "../components/OpenedProfileBox";
+import DMList from "../components/DMList";
+import ChatSection from "../components/ChatSection";
 
+//react
+import { useState,useEffect } from "react";
+import API from "../services/api";
+//css
+import "../components/BoxStyles.css";
+import "../components/UsersListBox.css";
+import "../components/DMList.css";
 
  export default function ChatUI() {
 
@@ -155,6 +169,7 @@
             onFollowToggle={handleFollowToggle}
             dmUsers={dmUsers}
   
+         
   
           />
         </div>
