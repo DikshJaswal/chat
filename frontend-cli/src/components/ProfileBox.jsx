@@ -3,81 +3,66 @@ import { useNavigate } from "react-router-dom";
 import "./BoxStyles.css";
 import API from "../services/api";
 
-export default function ProfileBox({ 
-  username = "neo_coder",
-  gender = "Male",
-  bio = "Hacking the matrix one line at a time",
-  joinDate = "15/08/2025",
-  isOnline = true
-}) {
+export default function ProfileBox({ userData }) {  // Receive userData as prop
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-      await API.post('/api/logout');
-      localStorage.removeItem('user');
-      navigate('/login');
-      alert('Logged out successfully');
+      await API.post("/logout");
+      localStorage.removeItem("user");
+      navigate("/login");
     } catch (error) {
-      console.error('Logout error:', error);
-      alert('Logout failed');
+      console.error("Logout error:", error);
+      alert("Logout failed");
     }
+  };
+
+  if (!userData) return <div className="section profile-box">Loading profile...</div>;
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString();
   };
 
   return (
     <div className="section profile-box">
-      {/* Animated background elements */}
       <div className="cyber-grid-overlay"></div>
       <div className="particle-aura"></div>
       
-      {/* Username Header with enhanced styling */}
       <div className="profile-header">
         <h3 className="username">
           <span className="username-bracket">[</span>
-          @{username}
+          @{userData.username}
           <span className="username-bracket">]</span>
         </h3>
-        <span className={`status ${isOnline ? 'online' : 'offline'}`}>
+        <span className="status online">
           <span className="status-indicator"></span>
-          {isOnline ? 'ACTIVE' : 'INACTIVE'}
+          ACTIVE
         </span>
-        <button 
-          onClick={handleLogout}
-          className="logout-btn"
-          style={{
-            background: 'red',
-            color: 'white',
-            border: 'none',
-            padding: '2px 8px',
-            borderRadius: '3px',
-            fontSize: '10px',
-            cursor: 'pointer',
-            marginLeft: '10px'
-          }}
-        >
+        <button onClick={handleLogout} className="logout-btn">
           Logout
         </button>
       </div>
       
-      {/* Profile Content - Side by side layout */}
       <div className="profile-content">
-        {/* Profile Details - Left side */}
         <div className="profile-details">
           <div className="detail-row">
             <span className="detail-label">ID:</span>
-            <span className="detail-value">{gender}</span>
+            <span className="detail-value">{userData.details?.gender || "Not specified"}</span>
           </div>
           <div className="detail-row bio">
             <span className="detail-label">BIO:</span>
-            <span className="detail-value bio-text">{bio}</span>
+            <span className="detail-value bio-text">
+              {userData.details?.bio || "No bio set"}
+            </span>
           </div>
           <div className="detail-row">
             <span className="detail-label">DATE JOINED:</span>
-            <span className="detail-value">{joinDate}</span>
+            <span className="detail-value">
+              {userData.createdAt ? formatDate(userData.createdAt) : "Unknown"}
+            </span>
           </div>
         </div>
         
-        {/* Enhanced Profile Frame - Right side */}
         <div className="profile-frame">
           <div className="frame-border-animation"></div>
           <div className="frame-corner tl"></div>
@@ -93,7 +78,6 @@ export default function ProfileBox({
         </div>
       </div>
       
-      {/* Additional decorative elements */}
       <div className="tech-lines"></div>
       <div className="corner-decoration top-left"></div>
       <div className="corner-decoration top-right"></div>

@@ -1,79 +1,68 @@
 const express = require('express');
-//this is the cross origin resource sharing for smooth data transfer
 const cors = require('cors');
-require('dotenv').config({debug:true});
-//allows to create http server manually 
+require('dotenv').config({ debug: true });
 const { createServer } = require("node:http");
-const { Server } = require("socket.io"); // this is socket.io's Server
-
-//allows to join several paths in a single segment
-const { join } = require('node:path');
-
+const { Server } = require("socket.io");
 const connectDB = require('./config/config');
-
+const socketAuth = require("./middlewares/socketMiddleware"); // ✅ import
 
 const port = process.env.PORT || 5000;
-const app = express(); //creating an express instance
-//wraps express inside the http server and allows to attach extra functions
+const app = express();
 const server = createServer(app);
+const followRoutes = require("./routes/follow");
 
-
-//middlewares
+// middlewares
 app.use(express.json());
 app.use(cors({
     origin: process.env.CLIENT_URL || 'http://localhost:3000',
     credentials: true
 }));
 
-//routes
+// routes
 app.use('/api', require('./routes/loginRoute'));
 app.use('/api', require('./routes/registerRoute'));
 app.use('/api', require('./routes/profileRoute'));
 app.use('/api', require('./routes/logoutRoute'));
-app.use('api',require('./routes/userListRoute'));
+app.use('/api', require('./routes/userListRoute')); // ✅ fixed missing slash
+app.use("/api", followRoutes);
 
 app.get('/', (req, res) => {
     res.send('backend is running');
 });
 
-
-//socket.io 
-//create the socket.io instance , unique for each user
-const io = new Server(server,{
-    //it enables restoration of rooms and any missed events when the connection is disrupted
-    //its a temporary act
+// socket.io instance
+const io = new Server(server, {
     cors: {
-        //enable cors operation in socket io
         origin: process.env.CLIENT_URL || "http://localhost:3000",
-        methods: ["GET", "POST","PUT","DELETE"],
+        methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true,
-      },
+    },
     connectionStateRecovery: {}
-  });
+});
 
-// we are setting up a listner to the event where client connects to socket.io server and if 
-//this is passed successfully then we get access to the socket.io objects & methods
-io.on('connection', (socket) => {
-    console.log('user connected',socket.user.email);
-    // here we print the message from the client
-    socket.on('chat message', (msg) => {
-        const messageData={
-            sender: socket.user.username, // from JWT payload
+// ✅ apply auth middleware *after io is created*
+io.use(socketAuth);
+
+io.on("connection", (socket) => {
+    console.log("user connected:", socket.user.email);
+
+    socket.on("chat message", (msg) => {
+        const messageData = {
+            sender: socket.user.username,
             text: msg.text,
-            to: msg.to, // if doing private chats
-        }
-        //send msg to everyone accept the sender
-        socket.broadcast.emit('chat message',messageData);
+            to: msg.to,
+        };
+        socket.broadcast.emit("chat message", messageData);
     });
-    socket.on('disconnect',()=>{
-        console.log('User disconnected',socket.user.email);
+
+    socket.on("disconnect", () => {
+        console.log("User disconnected:", socket.user.email);
     });
 });
 
-
-
+// start server
 connectDB().then(() => {
     server.listen(port, () => {
         console.log(`server is running on port : ${port}`);
-    })
-})
+    });
+});

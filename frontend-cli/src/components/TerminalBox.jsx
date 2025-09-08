@@ -1,13 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./BoxStyles.css";
+import { followUser, unfollowUser } from "../services/api";
 
 export default function TerminalBox({
   setRightView,
-  setProfileUser, // NEW
-  setChatUser,    // NEW
+  setProfileUser,
+  setChatUser,
   users,
+  dmUsers,
   onFollowToggle,
-  dmUsers
+  currentUser,
+  activeCommand,
+  setActiveCommand,
 }) {
   const [lines, setLines] = useState([
     "Welcome to ChatCLI!",
@@ -16,10 +20,8 @@ export default function TerminalBox({
   const [input, setInput] = useState("");
   const terminalEndRef = useRef(null);
 
-  const me = { username: "me", fullName: "You", bio: "Building ChatCLI", gender: "X" };
-
   const printCmd = (cmd, outputs = []) => {
-    setLines(prev => [...prev, `$ ${cmd}`, ...outputs]);
+    setLines((prev) => [...prev, `$ ${cmd}`, ...outputs]);
   };
 
   const commands = {
@@ -38,79 +40,88 @@ export default function TerminalBox({
       "  logout            Log out and return to login page"
     ],
 
-    
-    clear: () => [],
+    clear: () => { setLines([]); return []; },
 
     whoami: () => [
-      `@${me.username}`,
-      `Name: ${me.fullName}`,
-      `Bio: ${me.bio}`,
-      `Gender: ${me.gender}`
+      `@${currentUser?.username || "N/A"}`,
+      `Bio: ${currentUser?.details?.bio || "N/A"}`,
+      `Gender: ${currentUser?.details?.gender || "N/A"}`
     ],
 
-    users: () => {
-      setRightView("users");
-      return ["Switched to Users List view (right side)."];
-    },
+    users: () => { setRightView("users"); return ["Switched to Users List view (right side)."]; },
 
-    home: () => {
-      setRightView("chat");
-      setProfileUser(null);
-      return ["Switched to home view (right side)."];
-    },
+    home: () => { setRightView("chat"); setProfileUser(null); return ["Switched to home view (right side)."]; },
 
-    // LEFT: profile open only
     open: (args) => {
       if (!args.length) return ["Usage: open <username>"];
-      const target = users.find(u => u.username === args[0]);
+      const usernameInput = args[0].toLowerCase();
+      const target = users.find(u => u.username.toLowerCase() === usernameInput);
       if (target) {
-        setProfileUser(target); // <-- only affects LEFT side
-        return [`Opened profile of @${args[0]}`];
-      } else {
-        return [`User not found: ${args[0]}`];
+        setProfileUser(target);
+        return [
+          `Opened profile of @${target.username}`,
+          `Bio: ${target.details?.bio || "N/A"}`,
+          `Gender: ${target.details?.gender || "N/A"}`
+        ];
+      }
+      return [`User not found: ${args[0]}`];
+    },
+
+    follow: async (args) => {
+      if (!args.length) return ["Usage: follow <username>"];
+      const usernameInput = args[0].toLowerCase();
+      const targetUser = users.find(u => u.username.toLowerCase() === usernameInput);
+      if (!targetUser) return [`User not found: ${args[0]}`];
+
+      try {
+        const res = await followUser(targetUser.username, currentUser._id);
+        if (res.data.success) {
+          onFollowToggle(targetUser.username, true);
+          setActiveCommand(`follow ${targetUser.username}`);
+          return [`You are now following @${targetUser.username}`];
+        }
+        return [`Error: ${res.data.message}`];
+      } catch (err) {
+        console.error("Follow API error:", err);
+        return ["Error following user"];
       }
     },
 
-    follow: (args) => {
-      if (!args.length) return ["Usage: follow <username>"];
-      const target = users.find(u => u.username === args[0]);
-      if (!target) return [`User not found: ${args[0]}`];
-      onFollowToggle(args[0], true);
-      return [`You are now following @${args[0]}`];
-    },
-
-    unfollow: (args) => {
+    unfollow: async (args) => {
       if (!args.length) return ["Usage: unfollow <username>"];
-      const target = users.find(u => u.username === args[0]);
-      if (!target) return [`User not found: ${args[0]}`];
-      onFollowToggle(args[0], false);
-      return [`You unfollowed @${args[0]}`];
+      const usernameInput = args[0].toLowerCase();
+      const targetUser = users.find(u => u.username.toLowerCase() === usernameInput);
+      if (!targetUser) return [`User not found: ${args[0]}`];
+
+      try {
+        const res = await unfollowUser(targetUser.username, currentUser._id);
+        if (res.data.success) {
+          onFollowToggle(targetUser.username, false);
+          setActiveCommand(`unfollow ${targetUser.username}`);
+          return [`You have unfollowed @${targetUser.username}`];
+        }
+        return [`Error: ${res.data.message}`];
+      } catch (err) {
+        console.error("Unfollow API error:", err);
+        return ["Error unfollowing user"];
+      }
     },
 
-    // RIGHT: DM list explicitly (clear chat user so list shows)
-    dm: () => {
-      setChatUser(null);     // <-- show list, not chat
-      setRightView("dm");
-      return ["Opened DM List on the right panel."];
-    },
+    dm: () => { setChatUser(null); setRightView("dm"); return ["Opened DM List on the right panel."]; },
 
-    // RIGHT: open chat only if in DM list
     chat: (args) => {
       if (!args.length) return ["Usage: chat <username>"];
-      const username = args[0];
-      const user = dmUsers.find(u => u.username === username);
-      if (!user) return [`Error: ${username} is not in your DM list.`];
+      const usernameInput = args[0].toLowerCase();
+      const user = dmUsers.find(u => u.username.toLowerCase() === usernameInput);
+      if (!user) return [`Error: ${args[0]} is not in your DM list.`];
 
-      setChatUser(user);     // <-- open chat on RIGHT
+      setChatUser(user);
       setRightView("dm");
-      setProfileUser(user); 
-      return [`Opening chat with ${username}... (input is focused)`];
+      setProfileUser(user);
+      return [`Opening chat with ${user.username}... (input is focused)`];
     },
-
-   
   };
 
-  // --- Command runner ---
   const handleCommand = (rawCmd) => {
     const tokens = rawCmd.trim().split(/\s+/);
     if (!tokens.length) return;
@@ -119,12 +130,9 @@ export default function TerminalBox({
     const args = tokens.slice(1);
 
     if (commands[command]) {
-      if (command === "clear") {
-        setLines([]);
-      } else {
-        const out = commands[command](args);
-        printCmd(rawCmd, Array.isArray(out) ? out : [String(out)]);
-      }
+      const out = commands[command](args);
+      if (out instanceof Promise) out.then(res => printCmd(rawCmd, res));
+      else printCmd(rawCmd, Array.isArray(out) ? out : [String(out)]);
     } else {
       printCmd(rawCmd, [`Unknown command: ${command}`, 'Type "help" for list.']);
     }
@@ -137,9 +145,7 @@ export default function TerminalBox({
     setInput("");
   };
 
-  useEffect(() => {
-    terminalEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [lines]);
+  useEffect(() => { terminalEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [lines]);
 
   return (
     <div className="section terminal-box">

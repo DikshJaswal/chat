@@ -1,18 +1,44 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./OpenedProfileBox.css";
+import { followUser, unfollowUser } from "../services/api";
 
-export default function OpenedProfileBox({ user, activeCommand, onFollowToggle }) {
-  // Handle terminal commands follow/unfollow
+export default function OpenedProfileBox({ user, currentUser, activeCommand, onFollowToggle }) {
+  const [isFollowing, setIsFollowing] = useState(user?.isFollowing || false);
+
+  // Sync follow state with Terminal command
   useEffect(() => {
     if (!activeCommand || !user) return;
     const [command, target] = activeCommand.split(" ");
     if (target === user.username) {
-      if (command === "follow") onFollowToggle(user.username, true);
-      if (command === "unfollow") onFollowToggle(user.username, false);
+      setIsFollowing(command === "follow");
     }
-  }, [activeCommand, user, onFollowToggle]);
+  }, [activeCommand, user]);
 
   if (!user) return null;
+
+  const handleFollowToggle = async () => {
+    if (!currentUser?._id) return console.error("Current user ID not available");
+
+    try {
+      let res;
+      if (isFollowing) {
+        res = await unfollowUser(user.username, currentUser._id);
+        if (res.data.success) {
+          setIsFollowing(false);
+          onFollowToggle?.(user.username, false);
+        }
+      } else {
+        res = await followUser(user.username, currentUser._id);
+        if (res.data.success) {
+          setIsFollowing(true);
+          onFollowToggle?.(user.username, true);
+        }
+      }
+    } catch (err) {
+      console.error("Follow/Unfollow error:", err);
+      alert("Something went wrong while updating follow status.");
+    }
+  };
 
   return (
     <div className="opened-profile-container">
@@ -23,9 +49,10 @@ export default function OpenedProfileBox({ user, activeCommand, onFollowToggle }
 
       <div className="opened-profile-body">
         <div className="profile-info">
-          <p><span className="label">ID:</span> {user.gender}</p>
-          <p><span className="label">BIO:</span> <em>{user.bio}</em></p>
-          <p><span className="label">DATE JOINED:</span> {user.joinDate}</p>
+          <p><span className="label">Username:</span> @{user.username || "Unknown"}</p>
+          <p><span className="label">Bio:</span> <em>{user.details?.bio || "No bio available"}</em></p>
+          <p><span className="label">Gender:</span> {user.details?.gender || "N/A"}</p>
+          <p><span className="label">Date Joined:</span> {user.joinDate || "Unknown"}</p>
         </div>
 
         <div className="profile-dp">
@@ -37,10 +64,10 @@ export default function OpenedProfileBox({ user, activeCommand, onFollowToggle }
 
       <div className="profile-actions">
         <button
-          className={`follow-btn ${user.isFollowing ? "unfollow" : ""}`}
-          onClick={() => onFollowToggle(user.username, !user.isFollowing)}
+          className={`follow-btn ${isFollowing ? "unfollow" : ""}`}
+          onClick={handleFollowToggle}
         >
-          {user.isFollowing ? "Unfollow" : "Follow"}
+          {isFollowing ? "Unfollow" : "Follow"}
         </button>
       </div>
     </div>
