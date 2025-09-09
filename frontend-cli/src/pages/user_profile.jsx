@@ -1,102 +1,94 @@
-import React, { useState,useEffect } from 'react';
-import {useNavigate} from 'react-router-dom';
-import axios from 'axios'; // Make sure to install: npm install axios
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 
 export default function UserProfile() {
+  const navigate = useNavigate();
 
-  //creating the vars
-  const navigate=useNavigate();
-
-  //gender and username states
-  const [username,setUsername] = useState('Trial User');
+  // State management
+  const [username, setUsername] = useState('Trial User');
   const [gender, setGender] = useState({
     male: false,
     female: false,
-    nonBinary: false,
+    other: false,
   });
+  const [bio, setBio] = useState('I am a cyberpunk explorer.');
+  const [isEditingBio, setIsEditingBio] = useState(false);
 
-  //  Bio state
-  const [bio, setBio] = useState('I am a cyberpunk explorer.'); // Simulate existing bio
-  const [isEditingBio, setIsEditingBio] = useState(false); // Controls input visibility
+  // Fetch profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await API.get('/api/userprofile');
+        
+        if (res.data.success) {
+          const userData = res.data.user;
+          setUsername(userData.username);
+          setBio(userData.details?.bio || 'No bio set');
+
+          // Set gender checkboxes based on actual data
+          if (userData.details?.gender === 'male') {
+            setGender(prev => ({ ...prev, male: true }));
+          } else if (userData.details?.gender === 'female') {
+            setGender(prev => ({ ...prev, female: true }));
+          } else if (userData.details?.gender === 'other') {
+            setGender(prev => ({ ...prev, other: true }));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load profile:', err);
+        if (err.response?.status === 401) {
+          alert('Session expired. Please log in again.');
+          navigate('/login');
+        } else {
+          alert('Could not load your profile. Please try again.');
+        }
+      }
+    };
+
+    fetchProfile();
+  }, [navigate]);
 
   const handleGenderChange = (key) => {
     setGender((prev) => ({
-      ...prev,
+      male: false,
+      female: false,
+      other: false,
       [key]: !prev[key],
     }));
   };
 
-  //making sure the DB data is fetched when the page is loaded
-  useEffect(() => {
-  const fetchProfile = async () => {
-    try {
-      const res = await API.get('/api/userprofile');
-      
-      if (res.data.success) {
-        const userData = res.data.user;
-        setUsername(userData.username);
-        setBio(userData.details?.bio || 'No bio set');
-
-        // Set gender checkboxes based on actual data
-        if (userData.details?.gender === 'male') {
-          setGender(prev => ({ ...prev, male: true }));
-        } else if (userData.details?.gender === 'female') {
-          setGender(prev => ({ ...prev, female: true }));
-        } else if (userData.details?.gender === 'other') {
-          setGender(prev => ({ ...prev, nonBinary: true }));
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load profile:', err);
-      if (err.response?.status === 401) {
-        alert('Session expired. Please log in again.');
-        navigate('/login');
-      } else {
-        alert('Could not load your profile. Please try again.');
-      }
-    }
-  };
-
-  fetchProfile();
-}, [navigate]);
-
-  //the code will run on profile updation
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const selected = Object.keys(gender).filter((k) => gender[k]);
-    const genderValue = selected.length > 0 ? selected[0] : null;
+    const genderValue = gender.male ? 'male' : 
+                       gender.female ? 'female' : 
+                       gender.other ? 'other' : null;
 
     try {
-      const res = await API.put('/api/userprofile',{
+      const res = await API.put('/api/userprofile', {
         bio,
-        gender:genderValue
+        gender: genderValue
       });
 
       if (res.data.success) {
-        const updatedUser = res.data.user;
-        setUsername(updatedUser.username);
-        if (updatedUser?.details?.bio) {
-          setBio(updatedUser.details.bio ||'');
-        }
-        // Update gender checkboxes if needed
+        alert("Profile updated successfully!");
+        setIsEditingBio(false);
       }
     } catch (err) {
       console.error('Error while updating profile', err);
       alert('Failed to update profile. Check console for details.');
     }
-
-    //  After submit, hide the input
-    setIsEditingBio(false);
   };
 
-
-  //navigate to help section
-  const How_to=()=>{
+  // Navigation functions
+  const navigateToHowTo = () => {
     navigate('/how_to');
-  }
+  };
 
-
+  const navigateToHome = () => {
+    navigate('/chat');
+  };
 
   return (
     <div className="relative h-screen w-full bg-black overflow-hidden flex items-center justify-center p-4">
@@ -219,7 +211,13 @@ export default function UserProfile() {
                 >
                   Cancel
                 </button>
-               
+                <button
+                  type="button"
+                  onClick={() => setIsEditingBio(false)}
+                  className="text-xs px-2 py-1 bg-green-800 text-green-500 font-bold rounded hover:bg-green-600"
+                >
+                  Save
+                </button>
               </div>
             </div>
           )}
@@ -236,7 +234,7 @@ export default function UserProfile() {
                 onChange={() => handleGenderChange('male')}
                 className="accent-green-500"
               />
-              <span>He/Him</span>
+              <span>Male</span>
             </label>
             <label className="flex items-center space-x-1 text-green-300">
               <input
@@ -245,16 +243,16 @@ export default function UserProfile() {
                 onChange={() => handleGenderChange('female')}
                 className="accent-green-500"
               />
-              <span>She/Her</span>
+              <span>Female</span>
             </label>
             <label className="flex items-center space-x-1 text-green-300">
               <input
                 type="checkbox"
-                checked={gender.nonBinary}
-                onChange={() => handleGenderChange('nonBinary')}
+                checked={gender.other}
+                onChange={() => handleGenderChange('other')}
                 className="accent-green-500"
               />
-              <span>They/Them</span>
+              <span>Other</span>
             </label>
           </div>
         </div>
@@ -263,25 +261,24 @@ export default function UserProfile() {
         <div className="flex gap-3 justify-center">
           <button
             type="button"
-            onClick={How_to}
+            onClick={navigateToHowTo}
             className="px-4 py-1 bg-gray-800 text-green-400 border border-green-700 rounded text-xs hover:bg-green-500 hover:text-white transition"
           >
             HOW TO USE
           </button>
           <button
             type="button"
-            onClick={() => navigate('/chat')}  
+            onClick={navigateToHome}
             className="px-4 py-1 bg-gray-800 text-green-400 border border-green-700 rounded text-xs hover:bg-green-500 hover:text-white transition"
           >
             Home
           </button>
           <button
-                  type="submit"
-                  className="text-xs px-2 py-1 bg-green-800 text-green-500 font-bold rounded hover:bg-green-600"
-                >
-                  Save
-                </button>
-          {/* "Apply Changes" is now handled by Save in bio */}
+            type="submit"
+            className="px-4 py-1 bg-green-800 text-green-500 font-bold rounded hover:bg-green-600 text-xs"
+          >
+            Save
+          </button>
         </div>
       </form>
 
@@ -303,11 +300,11 @@ export default function UserProfile() {
         @keyframes glow {
           0% {
             opacity: 0.6;
-            box-shadow: 0 0 10px rgba(0, 255, 0, 0.4);
+            boxShadow: 0 0 10px rgba(0, 255, 0, 0.4);
           }
           100% {
             opacity: 0.9;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.7);
+            boxShadow: 0 0 20px rgba(0, 255, 0, 0.7);
           }
         }
         .animate-pulse {

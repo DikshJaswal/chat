@@ -1,22 +1,7 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import "./BoxStyles.css";
-import API from "../services/api";
 
-export default function ProfileBox({ userData }) {  // Receive userData as prop
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      await API.post("/logout");
-      localStorage.removeItem("user");
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-      alert("Logout failed");
-    }
-  };
-
+export default function ProfileBox({ userData }) {
   if (!userData) return <div className="section profile-box">Loading profile...</div>;
 
   const formatDate = (dateString) => {
@@ -38,23 +23,27 @@ export default function ProfileBox({ userData }) {  // Receive userData as prop
           <span className="status-indicator"></span>
           ACTIVE
         </span>
-        <button onClick={handleLogout} className="logout-btn">
-          Logout
-        </button>
       </div>
       
       <div className="profile-content">
         <div className="profile-details">
+          {/* Gender field */}
           <div className="detail-row">
-            <span className="detail-label">ID:</span>
-            <span className="detail-value">{userData.details?.gender || "Not specified"}</span>
+            <span className="detail-label">GENDER:</span>
+            <span className="detail-value">
+              {userData.details?.gender ? userData.details.gender.charAt(0).toUpperCase() + userData.details.gender.slice(1) : "Not specified"}
+            </span>
           </div>
+          
+          {/* Bio field */}
           <div className="detail-row bio">
             <span className="detail-label">BIO:</span>
             <span className="detail-value bio-text">
               {userData.details?.bio || "No bio set"}
             </span>
           </div>
+          
+          {/* Date joined field */}
           <div className="detail-row">
             <span className="detail-label">DATE JOINED:</span>
             <span className="detail-value">

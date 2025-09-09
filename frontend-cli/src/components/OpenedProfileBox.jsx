@@ -14,6 +14,17 @@ export default function OpenedProfileBox({ user, currentUser, activeCommand, onF
     }
   }, [activeCommand, user]);
 
+  // Format date function
+  const formatDate = (dateString) => {
+    if (!dateString) return "Unknown";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   if (!user) return null;
 
   const handleFollowToggle = async () => {
@@ -50,14 +61,23 @@ export default function OpenedProfileBox({ user, currentUser, activeCommand, onF
       <div className="opened-profile-body">
         <div className="profile-info">
           <p><span className="label">Username:</span> @{user.username || "Unknown"}</p>
-          <p><span className="label">Bio:</span> <em>{user.details?.bio || "No bio available"}</em></p>
-          <p><span className="label">Gender:</span> {user.details?.gender || "N/A"}</p>
-          <p><span className="label">Date Joined:</span> {user.joinDate || "Unknown"}</p>
+          <p><span className="label">Bio:</span> <em>{user.bio || "No bio available"}</em></p>
+          <p><span className="label">Gender:</span> {user.gender || "Not specified"}</p>
+          <p><span className="label">Date Joined:</span> {formatDate(user.createdAt) || "Unknown"}</p>
+          {/* Add more fields as needed from your database */}
+          {user.location && <p><span className="label">Location:</span> {user.location}</p>}
+          {user.website && <p><span className="label">Website:</span> <a href={user.website} target="_blank" rel="noopener noreferrer">{user.website}</a></p>}
         </div>
 
         <div className="profile-dp">
           <div className="dp-circle">
-            <img src={user.dp || "/default-dp.png"} alt="avatar" />
+            <img 
+              src={user.profilePicture || user.avatar || "/default-dp.png"} 
+              alt={`${user.username}'s avatar`} 
+              onError={(e) => {
+                e.target.src = "/default-dp.png";
+              }}
+            />
           </div>
         </div>
       </div>
