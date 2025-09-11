@@ -1,12 +1,12 @@
 import { io } from "socket.io-client";
 
-const token = localStorage.getItem("token"); // or however you store it
-
-export const socket = io("http://localhost:5000", {
-  auth: {
-    token: token,
-  },
-  reconnection: true,
-  reconnectionAttempts: 5,
-  reconnectionDelay: 1000,
+const socket = io("http://localhost:5000", {
+  withCredentials: true,
+  transports: ["websocket", "polling"], // helps with xhr poll error
 });
+
+socket.on("connect_error", (err) => {
+  console.error("Socket connection failed:", err.message);
+});
+
+export { socket };

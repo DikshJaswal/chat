@@ -15,12 +15,13 @@ export default function UsersListBox({ users = [] }) {
     <div className="users-list-box">
       <h2 className="users-title">Active Users</h2>
       <ul className="users-list">
-        {users.map((user) => (
-          <li key={user._id} className="user-item">
-            <span className="user-avatar">👤</span>
-            <span className="user-name">@{user.username}</span>
-          </li>
-        ))}
+      {users.map((user, index) => (
+  <li key={user._id || user.username || index} className="user-item">
+    <span className="user-avatar">👤</span>
+    <span className="user-name">@{user.username}</span>
+  </li>
+))}
+
       </ul>
     </div>
   );

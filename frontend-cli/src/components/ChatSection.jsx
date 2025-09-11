@@ -90,16 +90,12 @@ export default function ChatSection({ user, goBack, setProfileUser }) {
       </div>
       <div className="chat-messages">
         {currentMessages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`chat-message ${
-              msg.sender === "You" ? "sent" : "received"
-            }`}
-          >
+          <div key={`${msg.sender}-${idx}-${msg.text}`} className={`chat-message ${msg.sender === "You" ? "sent" : "received"}`}>
             <strong>{msg.sender}: </strong>
             {msg.text}
           </div>
         ))}
+
         <div ref={messagesEndRef} />
       </div>
       <div className="chat-input">
